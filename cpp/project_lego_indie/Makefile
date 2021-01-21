@@ -3,8 +3,8 @@ export PATH:=3rdParty/linux_aarch64_musl/bin:3rdParty/linux_armhf_musl/bin:3rdPa
 CPP=main.cpp FindFigure.cpp FindFeature.cpp
 NAME=$(shell basename $(shell pwd))
 PARAMS=-static -O0 -g -std=c++17 -lboost_system -lboost_iostreams -lboost_program_options -lssl -lcrypto -lstdc++fs -lmgl -lmgl-fltk -lmgl -lfltk -lfltk_images  -lfreetype -lz -lpthread -latomic -ldlib -llibwebp -ltiff -lhpdfs -lgif -lturbojpeg -lopenjp2 -lpng -lgsl -llapack -lgfortran -lblas -lcblas -lgfortran -llapack -lblas -lgfortran -lm
-PARAMS_LINUX=-lopencv_imgcodecs -lopencv_calib3d -lopencv_imgproc -lopencv_core $(PARAMS) -lXinerama -lXft  -lXrender -lXfixes -lXext -lX11 -lxcb -lXau -lXdmcp -lrt -ldl
-PARAMS_WINDOWS=-lopencv_imgcodecs451 -lopencv_calib3d451 -lopencv_imgproc451 -lopencv_core451 -lIlmImf $(PARAMS) -DMGL_STATIC_DEFINE -DWIN32 -D_WIN32 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -mconsole -lcomdlg32 -lole32 -luuid -lcomctl32 -lwsock32 -lws2_32 -lksuser -lwinmm -lcrypt32 -lgdi32
+PARAMS_LINUX=-lopencv_imgcodecs -lopencv_features2d -lopencv_flann -lopencv_calib3d -lopencv_imgproc -lopencv_core $(PARAMS) -lXinerama -lXft  -lXrender -lXfixes -lXext -lX11 -lxcb -lXau -lXdmcp -lrt -ldl
+PARAMS_WINDOWS=-lopencv_imgcodecs451 -lopencv_features2d451 -lopencv_flann451 -lopencv_calib3d451 -lopencv_imgproc451 -lopencv_core451 -lIlmImf $(PARAMS) -DMGL_STATIC_DEFINE -DWIN32 -D_WIN32 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -mconsole -lcomdlg32 -lole32 -luuid -lcomctl32 -lwsock32 -lws2_32 -lksuser -lwinmm -lcrypt32 -lgdi32
 
 all: all_musl all_windows
 all_64: linux_x86_64_musl linux_aarch64_musl windows_64 linux_mips64el_musl

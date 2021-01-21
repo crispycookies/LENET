@@ -111,13 +111,14 @@ int main(int argc, char** argv)
 #endif
 
     IPicWorker::SPtr ff = std::make_shared<FindFigure>(bg_img);
-    IPicWorker::SPtr fLhand = std::make_shared<FindFeature>(templLhand, "Left Hand");
+    IPicWorker::SPtr fLhand = std::make_shared<FindFeature>(templLleg, "Body");
 
 
     ff->DoWork(img);
     std::cout << fLhand->DoWork(img) << std::endl;
 
     ImgShow I(img, "Original Image", ImgShow::fl_imgtype::rgb);
+    ImgShow B(templBody, "Original Image", ImgShow::fl_imgtype::rgb);
 
 
 

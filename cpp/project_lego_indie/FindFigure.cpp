@@ -69,7 +69,7 @@ bool FindFigure::DoWork(cv::Mat& pic){
         cv::Rect rct = cv::boundingRect(cnt[i]);
 
         // only use rectangles with at least 17000 pixels and also filter way too big ones (caused by shadows etc.)
-        if(rct.area() > 17000 && rct.width < thresh.cols * 0.85 && rct.height < thresh.rows * 0.85)
+        if(rct.area() > 17000 && rct.width < thresh.cols * 0.90 && rct.height < thresh.rows * 0.90)
             rot_rcts.push_back(cv::minAreaRect(cnt[i]));
     }
 

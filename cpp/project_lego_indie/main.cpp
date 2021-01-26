@@ -109,20 +109,24 @@ int main(int argc, char** argv)
     auto paths = getFromCmdLine(vm);
 
     // read images
-    cv::Mat img = imreadChecked(paths.path, cv::IMREAD_COLOR);
-    cv::Mat bg_img = imreadChecked(paths.bg_img_path, cv::IMREAD_COLOR);
-    cv::Mat templIndie = imreadChecked(paths.templDir.append("template.png"), cv::IMREAD_COLOR);
-    cv::Mat templBody = imreadChecked(paths.templDir.remove_filename().append("mask_body.png"), cv::IMREAD_COLOR) & templIndie;
-    cv::Mat templFace = imreadChecked(paths.templDir.remove_filename().append("mask_face.png"), cv::IMREAD_COLOR) & templIndie;
-    cv::Mat templHat = imreadChecked(paths.templDir.remove_filename().append("mask_hat.png"), cv::IMREAD_COLOR) & templIndie;
-    cv::Mat templHead = imreadChecked(paths.templDir.remove_filename().append("mask_head.png"), cv::IMREAD_COLOR) & templIndie;
-    cv::Mat templLarm = imreadChecked(paths.templDir.remove_filename().append("mask_larm.png"), cv::IMREAD_COLOR) & templIndie;
-    cv::Mat templRarm = imreadChecked(paths.templDir.remove_filename().append("mask_rarm.png"), cv::IMREAD_COLOR) & templIndie;
-    cv::Mat templLhand = imreadChecked(paths.templDir.remove_filename().append("mask_lhand.png"), cv::IMREAD_COLOR) & templIndie;
-    cv::Mat templRhand = imreadChecked(paths.templDir.remove_filename().append("mask_rhand.png"), cv::IMREAD_COLOR) & templIndie;
-    cv::Mat templLleg = imreadChecked(paths.templDir.remove_filename().append("mask_lleg.png"), cv::IMREAD_COLOR) & templIndie;
-    cv::Mat templRleg = imreadChecked(paths.templDir.remove_filename().append("mask_rleg.png"), cv::IMREAD_COLOR) & templIndie;
-    paths.templDir.remove_filename();
+    auto img = imreadChecked(paths.path, cv::IMREAD_COLOR);
+    auto bg_img = imreadChecked(paths.bg_img_path, cv::IMREAD_COLOR);
+    auto templIndie = imreadChecked(paths.templDir.append("template.png"), cv::IMREAD_COLOR);
+    auto templBody = imreadChecked(paths.templDir.remove_filename().append("mask_body.png"), cv::IMREAD_COLOR) & templIndie;
+    auto templFace = imreadChecked(paths.templDir.remove_filename().append("mask_face.png"), cv::IMREAD_COLOR) & templIndie;
+    auto templHat = imreadChecked(paths.templDir.remove_filename().append("mask_hat.png"), cv::IMREAD_COLOR) & templIndie;
+    auto templHead = imreadChecked(paths.templDir.remove_filename().append("mask_head.png"), cv::IMREAD_COLOR) & templIndie;
+    auto templLarm = imreadChecked(paths.templDir.remove_filename().append("mask_larm.png"), cv::IMREAD_COLOR) & templIndie;
+    auto templRarm = imreadChecked(paths.templDir.remove_filename().append("mask_rarm.png"), cv::IMREAD_COLOR) & templIndie;
+    auto templLhand = imreadChecked(paths.templDir.remove_filename().append("mask_lhand.png"), cv::IMREAD_COLOR) & templIndie;
+    auto templRhand = imreadChecked(paths.templDir.remove_filename().append("mask_rhand.png"), cv::IMREAD_COLOR) & templIndie;
+    auto templLleg = imreadChecked(paths.templDir.remove_filename().append("mask_lleg.png"), cv::IMREAD_COLOR) & templIndie;
+    auto templRleg = imreadChecked(paths.templDir.remove_filename().append("mask_rleg.png"), cv::IMREAD_COLOR) & templIndie;
+
+    {
+        paths.templDir.remove_filename();
+    }
+
 #ifdef _WIN32
 	FreeConsole();
 #endif

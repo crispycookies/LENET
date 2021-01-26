@@ -131,15 +131,17 @@ int main(int argc, char** argv)
 	FreeConsole();
 #endif
 
-    IPicWorker::SPtr ff = std::make_shared<FindFigure>(bg_img);
-    IPicWorker::SPtr fLhand = std::make_shared<FindFeature>(templLleg, "Body");
+    IPicWorker::SPtr cutter = std::make_shared<FindFigure>(bg_img);
+    IPicWorker::SPtr indieFinder = std::make_shared<FindFeature>(templIndie, "Body");
 
+    if(cutter->DoWork(img))
+        indieFinder->DoWork(img);
+    else
+        std::cerr << "No Figure Found!" << std::endl;
 
-    ff->DoWork(img);
-    std::cout << fLhand->DoWork(img) << std::endl;
-
-    ImgShow I(img, "Original Image", ImgShow::fl_imgtype::rgb);
-    ImgShow B(templBody, "Original Image", ImgShow::fl_imgtype::rgb);
+    ImgShow I(templBody, "Original Image", ImgShow::fl_imgtype::rgb);
+    ImgShow T(templIndie, "Indie", ImgShow::fl_imgtype::rgb);
+    ImgShow B(img, "Feature Image", ImgShow::fl_imgtype::rgb);
 
 
 

@@ -134,25 +134,18 @@ int main(int argc, char** argv)
     IPicWorker::SPtr cutter = std::make_shared<FindFigure>(bg_img);
     IPicWorker::SPtr indieFinder = std::make_shared<FindFeature>(templIndie, "Body");
 
-    if(cutter->DoWork(img))
+    //if(cutter->DoWork(img))
         indieFinder->DoWork(img);
-    else
-        std::cerr << "No Figure Found!" << std::endl;
+    //else
+    //    std::cerr << "No Figure Found!" << std::endl;
 
-    ImgShow I(templBody, "Original Image", ImgShow::fl_imgtype::rgb);
+    auto a = imreadChecked(paths.templDir.remove_filename().append("mask_hat.png"), cv::IMREAD_COLOR);
+    auto resultMasked = img(cv::Rect(0,0,a.cols,a.rows));
+    resultMasked &= a;
+
+    ImgShow I(resultMasked, "Original Image", ImgShow::fl_imgtype::rgb);
     ImgShow T(templIndie, "Indie", ImgShow::fl_imgtype::rgb);
     ImgShow B(img, "Feature Image", ImgShow::fl_imgtype::rgb);
-
-
-
-    // check leg
-
-    // Result msgbox
-/*
-    fl_message_hotspot(true); // popup msg box near mousepointer
-    ((Fl_Double_Window*)fl_message_icon()->parent())->icon(icon.get());
-    fl_message_title("Result");
-    fl_message("");*/
 
     return(Fl::run());
 }

@@ -15,8 +15,32 @@
 
 #include "ImgShow.h"
 
-bool FindFigure::DoWork(cv::Mat& pic){
+cv::Mat removeShadows(const cv::Mat& pic){
+    std::vector<cv::Mat> channels;
+    cv::split(pic, channels);
 
+    cv::Mat res_norm;
+    std::vector<cv::Mat> result_norm_planes;
+
+    for(auto &  plane : channels){
+    cv::Mat dilated_img, bg_img, norm_img, diff_img;
+        cv::dilate(plane, dilated_img, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7)));
+        cv::medianBlur(dilated_img, bg_img, 21);
+        cv::absdiff(plane, bg_img, diff_img);
+        diff_img = 255 - diff_img;
+        cv::normalize(diff_img, norm_img, 130, 255, cv::NORM_MINMAX, CV_8UC1);
+        //result_planes.push_back(diff_img)
+        result_norm_planes.emplace_back(norm_img);
+    }
+
+    cv::merge(result_norm_planes, res_norm);
+
+
+    return res_norm;
+}
+
+bool FindFigure::DoWork(cv::Mat& pic){
+    
     // divide original image with bg for brightness correction
     cv::Mat tmp1, tmp2;
     pic.convertTo(tmp1, CV_32FC3); 
@@ -24,38 +48,45 @@ bool FindFigure::DoWork(cv::Mat& pic){
     cv::Mat brightness_corrected = (tmp1) / (tmp2);
     brightness_corrected.convertTo(brightness_corrected, CV_8UC3, 255);
 
-    // crop image / create roi (center of image)
-    cv::Mat roi = brightness_corrected(cv::Rect(m_crop_x, m_crop_y, brightness_corrected.cols - 2 * m_crop_x, brightness_corrected.rows - 2 * m_crop_y));
+    cv::Mat without_shadows = removeShadows(brightness_corrected);
+    
 
+    // crop image / create roi (center of image)
+    cv::Mat roi_without_shadows = without_shadows(cv::Rect(m_crop_x, m_crop_y, brightness_corrected.cols - 2 * m_crop_x, brightness_corrected.rows - 2 * m_crop_y));
+    cv::Mat roi_brightness_corrected = brightness_corrected(cv::Rect(m_crop_x, m_crop_y, brightness_corrected.cols - 2 * m_crop_x, brightness_corrected.rows - 2 * m_crop_y));
+    ImgShow a(roi_without_shadows, "brightness_corrected", ImgShow::rgb, false);
     // load the image and perform pyramid mean shift filtering
     // to aid the thresholding step
     cv::Mat shifted;
-    cv::pyrMeanShiftFiltering(roi, shifted, 25, 45);
-
+    cv::pyrMeanShiftFiltering(roi_without_shadows, shifted, 5, 15);
+    ImgShow b(shifted, "shifted", ImgShow::rgb, false);   
     // convert to greyscale
     cv::Mat grey;
     cv::cvtColor(shifted, grey, cv::COLOR_BGR2GRAY);
 
     // Erode to get sure BG (create mask to get rid of local shadows)
-    cv::Mat erode, erode_mask;
-    cv::erode(grey, erode, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(15, 15)));
-    cv::threshold(erode, erode_mask, 180, 255, cv::THRESH_BINARY_INV);
+    //cv::Mat erode, erode_mask;
+    //cv::erode(grey, erode, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(20, 20)));
+    //cv::threshold(erode, erode_mask, 180, 255, cv::THRESH_BINARY_INV);
 
-    ImgShow c(erode_mask, "", ImgShow::grey, false);
+   // ImgShow c(erode_mask, "erode_mask", ImgShow::grey, false);
 
     // apply unsharp masking to reduce local shadows even more
     cv::Mat gaussfltr, mask, unsharp_masked;
-    cv::GaussianBlur(grey, gaussfltr, cv::Size(5, 5), 1);
-    cv::subtract(grey, gaussfltr, mask);
-    cv::addWeighted(grey, 1, mask, 2, 0, unsharp_masked);
+    //cv::GaussianBlur(grey, gaussfltr, cv::Size(5, 5), 1);
+    //cv::subtract(grey, gaussfltr, mask);
+    //cv::addWeighted(grey, 1, mask, 2, 0, unsharp_masked);
+
+    //ImgShow(unsharp_masked, "unsharp_masked", ImgShow::grey, false);
 
     // then apply thresholding to unsharp masked image
     cv::Mat thresh;
-    cv::threshold(unsharp_masked, thresh, 240, 255, cv::THRESH_BINARY_INV);
+    cv::threshold(grey, thresh, 230, 255, cv::THRESH_BINARY_INV);
 
-    
     // combine eroding mask + threshhold
-    cv::bitwise_and(thresh, erode_mask, thresh);
+    //cv::bitwise_and(thresh, erode_mask, thresh);
+    ImgShow d(thresh, "thresh", ImgShow::grey, false, true);
+
 
     // ----- find contours -----
     std::vector<std::vector<cv::Point>> cnt;
@@ -89,7 +120,7 @@ bool FindFigure::DoWork(cv::Mat& pic){
     M = getRotationMatrix2D(rot_rect.center, rot_rect.angle, 1.0);
 
     // perform the affine transformation
-    cv::warpAffine(roi, rotated, M, roi.size(), cv::INTER_CUBIC);
+    cv::warpAffine(roi_brightness_corrected, rotated, M, roi_brightness_corrected.size(), cv::INTER_CUBIC);
 
     // crop the resulting image
     cv::getRectSubPix(rotated, rot_rect.size, rot_rect.center, pic);
@@ -112,5 +143,6 @@ bool FindFigure::DoWork(cv::Mat& pic){
         cv::flip(pic, pic, 0);
     
     cv::resize(pic, pic, cv::Size(m_scale_x, m_scale_y));
+    ImgShow z(pic, "pic", ImgShow::rgb, false, true);
     return true;
 }

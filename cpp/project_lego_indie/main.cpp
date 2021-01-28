@@ -87,7 +87,8 @@ r_val getFromCmdLine(po::variables_map vm){
         path = vm["image"].as<std::string>();
     }
     if(!std::filesystem::exists(path)){
-        path = fl_file_chooser("Choose image file...", "*.jpg", "./pic/All/image_0.jpg", 1);
+        //path = fl_file_chooser("Choose image file...", "*.jpg", "./pic/All/image_0.jpg", 1);
+        path = "./pic/All/image_1.jpg";
     }
     if(vm.count("templdir")){
         templDir = vm["templdir"].as<std::string>();
@@ -113,8 +114,6 @@ int main(int argc, char** argv)
     auto img = imreadChecked(paths.path, cv::IMREAD_COLOR);
     auto bg_img = imreadChecked(paths.bg_img_path, cv::IMREAD_COLOR);
     auto templIndie = imreadChecked(paths.templDir.append("template.png"), cv::IMREAD_COLOR);
-    cv::GaussianBlur(templIndie, templIndie, cv::Size(3, 3), 1);
-
     auto templBody = imreadChecked(paths.templDir.remove_filename().append("mask_body.png"), cv::IMREAD_COLOR) & templIndie;
     auto templFace = imreadChecked(paths.templDir.remove_filename().append("mask_face.png"), cv::IMREAD_COLOR) & templIndie;
     auto templHat = imreadChecked(paths.templDir.remove_filename().append("mask_hat.png"), cv::IMREAD_COLOR) & templIndie;
@@ -135,11 +134,12 @@ int main(int argc, char** argv)
 #endif
 
     IPicWorker::SPtr cutter = std::make_shared<FindFigure>(bg_img);
-    IPicWorker::SPtr indieFinder = std::make_shared<FindFeature>(templFace, "Body");
+    IPicWorker::SPtr indieFinder = std::make_shared<FindFeature>(templIndie, "Body");
 
     cutter->DoWork(img);
-    indieFinder->DoWork(img);
     
+    std::cout << indieFinder->DoWork(img) << std::endl;
+
     ImgShow B(img, "Feature Image", ImgShow::fl_imgtype::rgb);
 
 

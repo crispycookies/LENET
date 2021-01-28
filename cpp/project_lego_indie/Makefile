@@ -45,5 +45,8 @@ windows_64:
 	x86_64-w64-mingw32-windres main.64.rc mainrc.64.o
 	x86_64-w64-mingw32-g++ -I3rdParty/$@/include -I3rdParty/$@/include/opencv4 -L3rdParty/$@/lib/opencv4/3rdparty  -L3rdParty/$@/lib -lstdc++fs $(CPP) -lstdc++fs  mainrc.64.o -lstdc++fs  $(PARAMS_WINDOWS) -lquadmath -o $(NAME).$@.exe
 	rm -rf mainrc.64.o
+debug:
+	gdb --tui -args $(NAME).linux_x86_64_musl
+
 clean:
 	rm -rf mainrc.32.o mainrc.64.o $(NAME).*

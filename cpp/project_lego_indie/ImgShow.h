@@ -46,8 +46,9 @@ public:
      * @param title Title to be shown in the window header
      * @param type Image type (use enum from this class namespace)
      * @param rescale if true min and max values of a given grayscale picture are rescaled between 0-255, defaults to false
+     * @param showblocking if true picture is shown immidiatly and blocks execution until window is closed.
      */
-    ImgShow(const cv::Mat& img, const std::string& title, const ImgShow::fl_imgtype& type, bool rescale = false){
+    ImgShow(const cv::Mat& img, const std::string& title, const ImgShow::fl_imgtype& type, bool rescale = false, bool showblocking = false){
 
         // Convert image data from BRG (opencv default) to RGB
         if(type == fl_imgtype::rgb || type == fl_imgtype::rgba){
@@ -76,6 +77,9 @@ public:
         m_Win->icon(m_Icon.get());
         m_Win->resizable(m_Box.get()); // some window managers may truncate big windows according their needs, so allow resizing here.
         m_Win->show();
+
+        if(showblocking)
+            while(Fl::wait()!=0){}
     }
     virtual ~ImgShow() = default;
 

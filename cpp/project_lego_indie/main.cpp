@@ -98,6 +98,7 @@ r_val getFromCmdLine(po::variables_map vm){
 
 int main(int argc, char** argv)
 {
+    Fl::scheme("gleam");
 
     // wm icon
     auto icon = std::make_shared<Fl_RGB_Image>(icon_data, 128, 128, ImgShow::fl_imgtype::rgba, 0);
@@ -112,6 +113,8 @@ int main(int argc, char** argv)
     auto img = imreadChecked(paths.path, cv::IMREAD_COLOR);
     auto bg_img = imreadChecked(paths.bg_img_path, cv::IMREAD_COLOR);
     auto templIndie = imreadChecked(paths.templDir.append("template.png"), cv::IMREAD_COLOR);
+    cv::GaussianBlur(templIndie, templIndie, cv::Size(3, 3), 1);
+
     auto templBody = imreadChecked(paths.templDir.remove_filename().append("mask_body.png"), cv::IMREAD_COLOR) & templIndie;
     auto templFace = imreadChecked(paths.templDir.remove_filename().append("mask_face.png"), cv::IMREAD_COLOR) & templIndie;
     auto templHat = imreadChecked(paths.templDir.remove_filename().append("mask_hat.png"), cv::IMREAD_COLOR) & templIndie;
@@ -132,20 +135,13 @@ int main(int argc, char** argv)
 #endif
 
     IPicWorker::SPtr cutter = std::make_shared<FindFigure>(bg_img);
-    IPicWorker::SPtr indieFinder = std::make_shared<FindFeature>(templIndie, "Body");
+    IPicWorker::SPtr indieFinder = std::make_shared<FindFeature>(templFace, "Body");
 
-    if(cutter->DoWork(img))
-        indieFinder->DoWork(img);
-    else
-        std::cerr << "No Figure Found!" << std::endl;
-
-    ImgShow I(templBody, "Original Image", ImgShow::fl_imgtype::rgb);
-    ImgShow T(templIndie, "Indie", ImgShow::fl_imgtype::rgb);
+    cutter->DoWork(img);
+    indieFinder->DoWork(img);
+    
     ImgShow B(img, "Feature Image", ImgShow::fl_imgtype::rgb);
 
-
-
-    // check leg
 
     // Result msgbox
 /*

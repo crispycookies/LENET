@@ -42,6 +42,10 @@ class FindFigure : public IPicWorker {
 
     private:
         cv::Mat m_Background;
+        const size_t m_crop_x = 30;
+        const size_t m_crop_y = 23;
+        const size_t m_scale_x = 124;
+        const size_t m_scale_y = 200;
 };
 
 #endif // FINDFIGURE_H

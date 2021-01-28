@@ -11,35 +11,37 @@
 #include <opencv2/imgproc.hpp>
 
 #include "FindFigure.h"
+#include <iostream>
 
 #include "ImgShow.h"
 
 bool FindFigure::DoWork(cv::Mat& pic){
 
-    
     // divide original image with bg for brightness correction
     cv::Mat tmp1, tmp2;
     pic.convertTo(tmp1, CV_32FC3); 
     m_Background.convertTo(tmp2, CV_32FC3); 
-    cv::Mat brightness_corrected = (tmp1 / (tmp2+1));
+    cv::Mat brightness_corrected = (tmp1) / (tmp2);
     brightness_corrected.convertTo(brightness_corrected, CV_8UC3, 255);
 
     // crop image / create roi (center of image)
-    cv::Mat roi = brightness_corrected(cv::Rect(30, 23, brightness_corrected.cols - 30 - 30, brightness_corrected.rows - 23 - 23));
+    cv::Mat roi = brightness_corrected(cv::Rect(m_crop_x, m_crop_y, brightness_corrected.cols - 2 * m_crop_x, brightness_corrected.rows - 2 * m_crop_y));
 
     // load the image and perform pyramid mean shift filtering
     // to aid the thresholding step
     cv::Mat shifted;
-    cv::pyrMeanShiftFiltering(roi, shifted, 20, 40);
+    cv::pyrMeanShiftFiltering(roi, shifted, 25, 45);
 
     // convert to greyscale
     cv::Mat grey;
     cv::cvtColor(shifted, grey, cv::COLOR_BGR2GRAY);
 
-    // Erode (create mask to get rid of local shadows)
+    // Erode to get sure BG (create mask to get rid of local shadows)
     cv::Mat erode, erode_mask;
     cv::erode(grey, erode, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(15, 15)));
-    cv::threshold(erode, erode_mask, 185, 255, cv::THRESH_BINARY_INV);
+    cv::threshold(erode, erode_mask, 180, 255, cv::THRESH_BINARY_INV);
+
+    ImgShow c(erode_mask, "", ImgShow::grey, false);
 
     // apply unsharp masking to reduce local shadows even more
     cv::Mat gaussfltr, mask, unsharp_masked;
@@ -50,6 +52,7 @@ bool FindFigure::DoWork(cv::Mat& pic){
     // then apply thresholding to unsharp masked image
     cv::Mat thresh;
     cv::threshold(unsharp_masked, thresh, 240, 255, cv::THRESH_BINARY_INV);
+
     
     // combine eroding mask + threshhold
     cv::bitwise_and(thresh, erode_mask, thresh);
@@ -91,5 +94,23 @@ bool FindFigure::DoWork(cv::Mat& pic){
     // crop the resulting image
     cv::getRectSubPix(rotated, rot_rect.size, rot_rect.center, pic);
 
+    // if the picture is now aligned horizontally rotate it by 90 degrees
+    if(pic.cols > pic.rows)
+        cv::rotate(pic, pic, cv::ROTATE_90_CLOCKWISE);
+
+    // now check center of mass, if the figure head points to bottom flip picture 
+    cv::Mat binCutPic;
+    cv::cvtColor(pic, binCutPic, cv::COLOR_BGR2GRAY);
+    // apply unsharp masking to reduce local shadows
+    cv::GaussianBlur(binCutPic, gaussfltr, cv::Size(5, 5), 1);
+    cv::subtract(binCutPic, gaussfltr, mask);
+    cv::addWeighted(binCutPic, 1, mask, 2, 0, binCutPic);
+    cv::bitwise_not(binCutPic, binCutPic, binCutPic == 0);
+    cv::threshold(binCutPic, binCutPic, 200, 255, cv::THRESH_BINARY_INV);
+    cv::Moments mu = cv::moments(binCutPic, true);
+    if((mu.m01 / mu.m00) < pic.rows / 2)
+        cv::flip(pic, pic, 0);
+    
+    cv::resize(pic, pic, cv::Size(m_scale_x, m_scale_y));
     return true;
 }

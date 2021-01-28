@@ -99,6 +99,8 @@ r_val getFromCmdLine(po::variables_map vm){
 int main(int argc, char** argv)
 {
 
+    using sptr = IPicWorker::SPtr;
+
     // wm icon
     auto icon = std::make_shared<Fl_RGB_Image>(icon_data, 128, 128, ImgShow::fl_imgtype::rgba, 0);
     auto vm_b = parseCmdLine(argc, argv);
@@ -131,21 +133,32 @@ int main(int argc, char** argv)
 	FreeConsole();
 #endif
 
-    IPicWorker::SPtr cutter = std::make_shared<FindFigure>(bg_img);
-    IPicWorker::SPtr indieFinder = std::make_shared<FindFeature>(templIndie, "Body");
+    sptr cutter = std::make_shared<FindFigure>(bg_img);
+    sptr indieFinder = std::make_shared<FindFeature>(templIndie, "Body");
 
-    //if(cutter->DoWork(img))
+    
+    ImgShow I(img, "Input Image", ImgShow::fl_imgtype::rgb);
+
+    if(cutter->DoWork(img)) {
+        auto img_copy_hat = img.clone();
         indieFinder->DoWork(img);
-    //else
-    //    std::cerr << "No Figure Found!" << std::endl;
 
-    auto a = imreadChecked(paths.templDir.remove_filename().append("mask_hat.png"), cv::IMREAD_COLOR);
-    auto resultMasked = img(cv::Rect(0,0,a.cols,a.rows));
-    resultMasked &= a;
 
-    ImgShow I(resultMasked, "Original Image", ImgShow::fl_imgtype::rgb);
-    ImgShow T(templIndie, "Indie", ImgShow::fl_imgtype::rgb);
-    ImgShow B(img, "Feature Image", ImgShow::fl_imgtype::rgb);
+            auto hatFinder = std::make_shared<FindFeature>(templHead, "Hat");
+            if(hatFinder->DoWork(img_copy_hat)){
+                std::cout << "Found Hat" << std::endl;
+            }
+    }
+    else
+        std::cerr << "No Figure Found!" << std::endl;
+
+
+
+
+    //ImgShow T(templIndie, "Indie", ImgShow::fl_imgtype::rgb);
+    //ImgShow B(img, "Feature Image", ImgShow::fl_imgtype::rgb);
+    //ImgShow B(img_copy_hat, "Feature Image", ImgShow::fl_imgtype::rgb);
+
 
     return(Fl::run());
 }

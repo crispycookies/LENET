@@ -28,7 +28,14 @@ bool FindFeature::DoWork(cv::Mat& pic) {
 
     std::vector<cv::DMatch> matches;
     matcher->match(found_templ, found_pic, matches);
-
+    
+   /* std::vector<cv::DMatch> good_matches;
+    const float ratio_thresh = 0.75f;
+    for (size_t i = 0; i < matches.size(); i++) {
+        if (matches[i].distance < ratio_thresh) {
+            good_matches.push_back(matches[i]);
+        }
+    }*/
 
     std::vector<cv::Point2f> pts_pic;
     std::vector<cv::Point2f> pts_tmpl;  
@@ -40,6 +47,14 @@ bool FindFeature::DoWork(cv::Mat& pic) {
     
     cv::Mat M = cv::findHomography(pts_pic, pts_tmpl, cv::RANSAC, 1.0);
     cv::Mat warped_perspective;
+
+    // XOpenIM() failed
+    // terminate called after throwing an instance of 'cv::Exception'
+    // what():  OpenCV(4.5.1) /home/giri/workspace/repoSystem/repos/packages/005_opencv/opencv-4.5.1/modules/calib3d/src/fundam.cpp:378: error: (-5:Bad argument) The input arrays should be 2D or 3D point sets in function 'findHomography'
+
+
+
+    //res = cv2.warpPerspective(homography,M,(img.shape[0], img.shape[1]),0)
 
     cv::Mat result;
     cv::warpPerspective(pic, result, M, pic.size());

@@ -150,24 +150,59 @@ int main(int argc, char** argv)
 
     for (const auto & entry : std::filesystem::directory_iterator("pic/All")) {
         std::cout << entry << std::endl;
-        auto templBody = imreadChecked(entry, cv::IMREAD_COLOR);
-        cutter->DoWork(templBody);
-        std::cout << leftArmFinder->DoWork(templBody) << std::endl;
-        cv::imwrite("test.png", templBody);
-        ImgShow(templBody, "", ImgShow::rgb, false, true);
+        
+        auto head = false, hat = false, leftHand = false, rightHand = false, leftArm = false, rightArm = false, leftFoot = false, rightFoot = false, facePrint = false, bodyPrint = false;
+        auto tmp = imreadChecked(entry, cv::IMREAD_COLOR);
+        if(!cutter->DoWork(tmp)){
+            std::cout << "No indie detected" << std::endl;
+            continue;
+        }
+
+
+        if(headFinder->DoWork(tmp)){
+            head = true;
+            hat = hatFinder->DoWork(tmp);
+            facePrint = facePrintFinder->DoWork(tmp);
+        }
+
+        if(leftHandFinder->DoWork(tmp)){
+            leftHand = true;
+            leftArm = true;
+        }
+        else{
+            leftArm = leftArmFinder->DoWork(tmp);
+        }
+
+        if(rightHandFinder->DoWork(tmp)){
+            rightHand = true;
+            rightArm = true;
+        }
+        else{
+            rightArm = rightArmFinder->DoWork(tmp);
+        }
+
+        leftFoot = leftFootFinder->DoWork(tmp);
+        rightFoot = rightFootFinder->DoWork(tmp);
+        bodyPrint = bodyPrintFinder->DoWork(tmp);
+
+        std::cout << "#############################################" << std::endl;
+        std::cout << "File #" << entry << std::endl;
+        std::cout << "---------------------------------------------" << std::endl;
+        std::cout << std::boolalpha;
+        std::cout << "Hat       -> " << hat << std::endl;
+        std::cout << "Head      -> " << head << std::endl;
+        std::cout << "Left Hand -> " << leftHand << std::endl;
+        std::cout << "Right Hand-> " << rightHand << std::endl; 
+        std::cout << "Left Arm  -> " << leftArm << std::endl; 
+        std::cout << "Right Arm -> " << rightArm << std::endl; 
+        std::cout << "Left Foot -> " << leftFoot << std::endl; 
+        std::cout << "Right Foot-> " << rightFoot << std::endl; 
+        std::cout << "Face      -> " << facePrint << std::endl; 
+        std::cout << "Body Print-> " << bodyPrint << std::endl; 
+        std::cout << "#############################################" << std::endl;
     }
 
-    cutter->DoWork(img);
 
-    ImgShow B(img, "Feature Image", ImgShow::fl_imgtype::rgb);
-
-
-    // Result msgbox
-/*
-    fl_message_hotspot(true); // popup msg box near mousepointer
-    ((Fl_Double_WindowResl_message_icon()->parent())->icon(icon.get());
-    fl_message_title("Result");
-    fl_message("");*/
 
     return(Fl::run());
 }

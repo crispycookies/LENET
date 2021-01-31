@@ -55,7 +55,7 @@ bool FindLeftArm::DoWork(cv::Mat& pic) {
         // data passed to plotting callback
         ,&found
         );
-    ImgShow(roi, "", ImgShow::rgb, false, true);
+    ImgShow(roi, "", ImgShow::rgb, false, false);
 
     if(min < 0.31)
         return true;

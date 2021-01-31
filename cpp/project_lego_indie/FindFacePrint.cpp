@@ -23,7 +23,6 @@ bool FindFacePrint::DoWork(cv::Mat& pic) {
 
     double min, max;
     cv::minMaxLoc(found, &min, &max);
-    std::cout << min << std::endl;
 
     // 3D Plots
     std::shared_ptr<mglFLTK> gr = std::make_shared<mglFLTK>(
@@ -54,7 +53,7 @@ bool FindFacePrint::DoWork(cv::Mat& pic) {
         ,&found
         );
     ImgShow(found, "", ImgShow::rgb, false, false);
-    
+
     if(min < 0.05)
         return true;
     return false;

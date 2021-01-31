@@ -50,3 +50,4 @@ debug:
 
 clean:
 	rm -rf mainrc.32.o mainrc.64.o $(NAME).*
+ 

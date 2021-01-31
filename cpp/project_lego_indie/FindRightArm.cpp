@@ -9,24 +9,54 @@
  */
 
 #include "FindRightArm.h"
+#include "ImgShow.h"
 
 #include <opencv2/imgproc.hpp>
 #include <iostream>
 
+// FLTK MathGL plotting widget
+#include <mgl2/fltk.h>
+
 bool FindRightArm::DoWork(cv::Mat& pic) {
-   /* cv::Mat pic_HSV;
-    cv::cvtColor(pic, pic_HSV, cv::COLOR_BGR2HSV);
-    cv::Mat roiRightHand = pic_HSV(cv::Rect(pic.cols - pic.cols * 0.3, pic.rows/ 2, pic.cols * 0.3, pic.rows/2));
-    cv::Mat hasRHand;
-    cv::inRange(roiRightHand, m_LowerColorBound, m_UpperColorBound, hasRHand);
-    if(cv::countNonZero(hasRHand))
-        return true; */
+    cv::Mat found;
+    cv::Mat roi = pic(cv::Rect(pic.cols * 0.5, pic.rows * 0.2, pic.cols * 0.5, pic.rows * 0.8));
+    cv::matchTemplate(roi, m_Template, found, cv::TM_SQDIFF_NORMED);
+
+    double min, max;
+    cv::minMaxLoc(found, &min, &max);
+    std::cout << min << std::endl;
+
+    // 3D Plots
+    std::shared_ptr<mglFLTK> gr = std::make_shared<mglFLTK>(
+        // plotting callback (needed for interactive plots)
+        [](mglBase *p1, void *p2) -> int{
+            mglGraph gr(p1);
+            cv::Mat d = *(static_cast<cv::Mat*>(p2));
+        
+            double min, max;
+            cv::minMaxLoc(d, &min, &max);
+
+            mglData d1{d.rows, d.cols, (float*)d.data};
+            gr.SubPlot(1,1,0);
+            gr.Title("");
+            gr.Box();
+            gr.SetRanges(0, d1.nx, 0, d1.ny, min, max);
+            gr.Axis("z");
+            gr.Surf(d1, "BbcyrR"); // BbcyrR == jet color map
+            //gr.Dens(cur.dat, "BbcyrR"); // for 2D only
+            gr.Colorbar();
+
+            return 0;
+        }
+        // window title
+        ,"Interactive Plots"
+        
+        // data passed to plotting callback
+        ,&found
+        );
+    ImgShow(roi, "", ImgShow::rgb, false, false);
+
+    if(min < 0.103)
+        return true;
     return false;
 }
-
-/*
-    cv::Mat roiRightArm = pic(cv::Rect(pic.cols * 0.85, pic.rows * 0.3, pic.cols - pic.cols * 0.85, (pic.rows - pic.rows * 0.3) - (pic.rows - pic.rows * 0.4)));
-    cv::Mat hasRArm;
-    cv::inRange(roiRightArm, cv::Scalar(6, 80, 63), cv::Scalar(19, 255, 153), hasRArm);
-    if(cv::countNonZero(hasRArm))
-        std::cout << "Has RArm" << std::endl;*/

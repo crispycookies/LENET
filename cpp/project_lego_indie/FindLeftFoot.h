@@ -44,3 +44,4 @@ class FindLeftFoot: public IPicWorker {
 };
 
 #endif // FINDHAT_H
+        

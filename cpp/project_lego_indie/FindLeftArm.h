@@ -23,6 +23,12 @@
 class FindLeftArm: public IPicWorker {
     public:
         /**
+         * CTor
+         * @param tmpl Example template used to match the arm.
+         */
+        FindLeftArm(const cv::Mat & tmpl) : m_Template(tmpl) {};
+
+        /**
          * Tries to find the left arm in the given picture.
          * @param pic [in] Picture to analyze.
          * @return true if feature was found, false otherwise.
@@ -39,8 +45,7 @@ class FindLeftArm: public IPicWorker {
     using WPtr = std::weak_ptr<FindLeftArm>;
 
     private:
-        const cv::Scalar m_LowerColorBound = cv::Scalar(11, 85, 240);
-        const cv::Scalar m_UpperColorBound = cv::Scalar(29, 107, 255);
+        cv::Mat m_Template;
 };
 
 #endif // FINDLEFTARM_H

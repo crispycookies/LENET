@@ -25,7 +25,17 @@
 
 #include "IPicWorker.h"
 #include "FindFigure.h"
-#include "FindFeature.h"
+#include "FindRightHand.h"
+#include "FindLeftHand.h"
+#include "FindRightFoot.h"
+#include "FindLeftFoot.h"
+#include "FindHead.h"
+#include "FindHat.h"
+#include "FindBodyPrint.h"
+#include "FindFacePrint.h"
+#include "FindLeftArm.h"
+#include "FindRightArm.h"
+
 #include "ImgShow.h"
 #include "Icon.h" // icon for window manager (embedded into executable for maximum portability)
 
@@ -113,18 +123,10 @@ int main(int argc, char** argv)
     auto img = imreadChecked(paths.path, cv::IMREAD_COLOR);
     auto bg_img = imreadChecked(paths.bg_img_path, cv::IMREAD_COLOR);
     auto templIndie = imreadChecked(paths.templDir.append("template.png"), cv::IMREAD_COLOR);
-    cv::GaussianBlur(templIndie, templIndie, cv::Size(3, 3), 1);
 
-    auto templBody = imreadChecked(paths.templDir.remove_filename().append("mask_body.png"), cv::IMREAD_COLOR) & templIndie;
-    auto templFace = imreadChecked(paths.templDir.remove_filename().append("mask_face.png"), cv::IMREAD_COLOR) & templIndie;
-    auto templHat = imreadChecked(paths.templDir.remove_filename().append("mask_hat.png"), cv::IMREAD_COLOR) & templIndie;
-    auto templHead = imreadChecked(paths.templDir.remove_filename().append("mask_head.png"), cv::IMREAD_COLOR) & templIndie;
+    auto templFace = imreadChecked(paths.templDir.remove_filename().append("template_face.png"), cv::IMREAD_COLOR);
     auto templLarm = imreadChecked(paths.templDir.remove_filename().append("mask_larm.png"), cv::IMREAD_COLOR) & templIndie;
     auto templRarm = imreadChecked(paths.templDir.remove_filename().append("mask_rarm.png"), cv::IMREAD_COLOR) & templIndie;
-    auto templLhand = imreadChecked(paths.templDir.remove_filename().append("mask_lhand.png"), cv::IMREAD_COLOR) & templIndie;
-    auto templRhand = imreadChecked(paths.templDir.remove_filename().append("mask_rhand.png"), cv::IMREAD_COLOR) & templIndie;
-    auto templLleg = imreadChecked(paths.templDir.remove_filename().append("mask_lleg.png"), cv::IMREAD_COLOR) & templIndie;
-    auto templRleg = imreadChecked(paths.templDir.remove_filename().append("mask_rleg.png"), cv::IMREAD_COLOR) & templIndie;
 
     {
         paths.templDir.remove_filename();
@@ -135,17 +137,27 @@ int main(int argc, char** argv)
 #endif
 
     IPicWorker::SPtr cutter = std::make_shared<FindFigure>(bg_img);
-    IPicWorker::SPtr indieFinder = std::make_shared<FindFeature>(templFace, "Body");
+    IPicWorker::SPtr headFinder = std::make_shared<FindHead>();
+    IPicWorker::SPtr hatFinder = std::make_shared<FindHat>();
+    IPicWorker::SPtr leftHandFinder = std::make_shared<FindLeftHand>();
+    IPicWorker::SPtr rightHandFinder = std::make_shared<FindRightHand>();
+    IPicWorker::SPtr rightFootFinder = std::make_shared<FindRightFoot>();
+    IPicWorker::SPtr leftFootFinder = std::make_shared<FindLeftFoot>();
+    IPicWorker::SPtr bodyPrintFinder = std::make_shared<FindBodyPrint>();
+    IPicWorker::SPtr facePrintFinder = std::make_shared<FindFacePrint>(templFace);
+    IPicWorker::SPtr leftArmFinder = std::make_shared<FindLeftArm>();
+    IPicWorker::SPtr rightArmFinder = std::make_shared<FindRightArm>();
+
 
     for (const auto & entry : std::filesystem::directory_iterator("pic/All")) {
         std::cout << entry << std::endl;
         auto templBody = imreadChecked(entry, cv::IMREAD_COLOR);
         cutter->DoWork(templBody);
+        std::cout << facePrintFinder->DoWork(templBody) << std::endl;
     }
 
     cutter->DoWork(img);
-    indieFinder->DoWork(img);
-    
+
     ImgShow B(img, "Feature Image", ImgShow::fl_imgtype::rgb);
 
 

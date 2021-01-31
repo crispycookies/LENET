@@ -1,6 +1,6 @@
 # HINT: for 3rdParty libs get https://github.com/nwrkbiz/static-build
 export PATH:=3rdParty/linux_aarch64_musl/bin:3rdParty/linux_armhf_musl/bin:3rdParty/linux_x86_64_musl/bin:3rdParty/linux_i686_musl/bin:3rdParty/linux_mips_musl/bin:3rdParty/linux_mipsel_musl/bin:3rdParty/linux_ppc_musl/bin:3rdParty/linux_mips64el_musl/bin:$(PATH)
-CPP=main.cpp FindFigure.cpp FindFeature.cpp
+CPP=main.cpp FindFigure.cpp FindRightHand.cpp FindRightFoot.cpp FindLeftHand.cpp FindLeftFoot.cpp FindHead.cpp FindHat.cpp FindBodyPrint.cpp FindFacePrint.cpp FindLeftArm.cpp FindRightArm.cpp
 NAME=$(shell basename $(shell pwd))
 PARAMS=-static -Os -g -std=c++17 -lboost_system -lboost_iostreams -lboost_program_options -lssl -lcrypto -lstdc++fs -lmgl -lmgl-fltk -lmgl -lfltk -lfltk_images  -lfreetype -lz -lpthread -latomic -ldlib -llibwebp -ltiff -lhpdfs -lgif -lturbojpeg -lopenjp2 -lpng -lgsl -llapack -lgfortran -lblas -lcblas -lgfortran -llapack -lblas -lgfortran -lm
 PARAMS_LINUX=-lopencv_imgcodecs -lopencv_features2d -lopencv_flann -lopencv_calib3d -lopencv_imgproc -lopencv_core $(PARAMS) -lXinerama -lXft  -lXrender -lXfixes -lXext -lX11 -lxcb -lXau -lXdmcp -lrt -ldl

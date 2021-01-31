@@ -137,6 +137,12 @@ int main(int argc, char** argv)
     IPicWorker::SPtr cutter = std::make_shared<FindFigure>(bg_img);
     IPicWorker::SPtr indieFinder = std::make_shared<FindFeature>(templFace, "Body");
 
+    for (const auto & entry : std::filesystem::directory_iterator("pic/All")) {
+        std::cout << entry << std::endl;
+        auto templBody = imreadChecked(entry, cv::IMREAD_COLOR);
+        cutter->DoWork(templBody);
+    }
+
     cutter->DoWork(img);
     indieFinder->DoWork(img);
     

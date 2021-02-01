@@ -25,7 +25,17 @@
 
 #include "IPicWorker.h"
 #include "FindFigure.h"
-#include "FindFeature.h"
+#include "FindRightHand.h"
+#include "FindLeftHand.h"
+#include "FindRightFoot.h"
+#include "FindLeftFoot.h"
+#include "FindHead.h"
+#include "FindHat.h"
+#include "FindBodyPrint.h"
+#include "FindFacePrint.h"
+#include "FindLeftArm.h"
+#include "FindRightArm.h"
+
 #include "ImgShow.h"
 #include "Icon.h" // icon for window manager (embedded into executable for maximum portability)
 
@@ -87,8 +97,7 @@ r_val getFromCmdLine(po::variables_map vm){
         path = vm["image"].as<std::string>();
     }
     if(!std::filesystem::exists(path)){
-        //path = fl_file_chooser("Choose image file...", "*.jpg", "./pic/All/image_0.jpg", 1);
-        path = "./pic/All/image_1.jpg";
+        path = fl_file_chooser("Choose image file...", "*.jpg", "./pic/All/image_0.jpg", 1);
     }
     if(vm.count("templdir")){
         templDir = vm["templdir"].as<std::string>();
@@ -113,17 +122,10 @@ int main(int argc, char** argv)
     // read images
     auto img = imreadChecked(paths.path, cv::IMREAD_COLOR);
     auto bg_img = imreadChecked(paths.bg_img_path, cv::IMREAD_COLOR);
-    auto templIndie = imreadChecked(paths.templDir.append("template.png"), cv::IMREAD_COLOR);
-    auto templBody = imreadChecked(paths.templDir.remove_filename().append("mask_body.png"), cv::IMREAD_COLOR) & templIndie;
-    auto templFace = imreadChecked(paths.templDir.remove_filename().append("mask_face.png"), cv::IMREAD_COLOR) & templIndie;
-    auto templHat = imreadChecked(paths.templDir.remove_filename().append("mask_hat.png"), cv::IMREAD_COLOR) & templIndie;
-    auto templHead = imreadChecked(paths.templDir.remove_filename().append("mask_head.png"), cv::IMREAD_COLOR) & templIndie;
-    auto templLarm = imreadChecked(paths.templDir.remove_filename().append("mask_larm.png"), cv::IMREAD_COLOR) & templIndie;
-    auto templRarm = imreadChecked(paths.templDir.remove_filename().append("mask_rarm.png"), cv::IMREAD_COLOR) & templIndie;
-    auto templLhand = imreadChecked(paths.templDir.remove_filename().append("mask_lhand.png"), cv::IMREAD_COLOR) & templIndie;
-    auto templRhand = imreadChecked(paths.templDir.remove_filename().append("mask_rhand.png"), cv::IMREAD_COLOR) & templIndie;
-    auto templLleg = imreadChecked(paths.templDir.remove_filename().append("mask_lleg.png"), cv::IMREAD_COLOR) & templIndie;
-    auto templRleg = imreadChecked(paths.templDir.remove_filename().append("mask_rleg.png"), cv::IMREAD_COLOR) & templIndie;
+
+    auto templFace = imreadChecked(paths.templDir.append("template_face.png"), cv::IMREAD_COLOR);
+    auto templLarm = imreadChecked(paths.templDir.remove_filename().append("template_left_arm.png"), cv::IMREAD_COLOR);
+    auto templRarm = imreadChecked(paths.templDir.remove_filename().append("template_right_arm.png"), cv::IMREAD_COLOR);
 
     {
         paths.templDir.remove_filename();
@@ -134,21 +136,73 @@ int main(int argc, char** argv)
 #endif
 
     IPicWorker::SPtr cutter = std::make_shared<FindFigure>(bg_img);
-    IPicWorker::SPtr indieFinder = std::make_shared<FindFeature>(templIndie, "Body");
+    IPicWorker::SPtr headFinder = std::make_shared<FindHead>();
+    IPicWorker::SPtr hatFinder = std::make_shared<FindHat>();
+    IPicWorker::SPtr leftHandFinder = std::make_shared<FindLeftHand>();
+    IPicWorker::SPtr rightHandFinder = std::make_shared<FindRightHand>();
+    IPicWorker::SPtr rightFootFinder = std::make_shared<FindRightFoot>();
+    IPicWorker::SPtr leftFootFinder = std::make_shared<FindLeftFoot>();
+    IPicWorker::SPtr bodyPrintFinder = std::make_shared<FindBodyPrint>();
+    IPicWorker::SPtr facePrintFinder = std::make_shared<FindFacePrint>(templFace);
+    IPicWorker::SPtr leftArmFinder = std::make_shared<FindLeftArm>(templLarm);
+    IPicWorker::SPtr rightArmFinder = std::make_shared<FindRightArm>(templRarm);
 
-    cutter->DoWork(img);
-    
-    std::cout << indieFinder->DoWork(img) << std::endl;
 
-    ImgShow B(img, "Feature Image", ImgShow::fl_imgtype::rgb);
+    for (const auto & entry : std::filesystem::directory_iterator("pic/All")) {
+        std::cout << entry << std::endl;
+        
+        auto head = false, hat = false, leftHand = false, rightHand = false, leftArm = false, rightArm = false, leftFoot = false, rightFoot = false, facePrint = false, bodyPrint = false;
+        auto tmp = imreadChecked(entry, cv::IMREAD_COLOR);
+        if(!cutter->DoWork(tmp)){
+            std::cout << "No indie detected" << std::endl;
+            continue;
+        }
 
 
-    // Result msgbox
-/*
-    fl_message_hotspot(true); // popup msg box near mousepointer
-    ((Fl_Double_Window*)fl_message_icon()->parent())->icon(icon.get());
-    fl_message_title("Result");
-    fl_message("");*/
+        if(headFinder->DoWork(tmp)){
+            head = true;
+            hat = hatFinder->DoWork(tmp);
+            facePrint = facePrintFinder->DoWork(tmp);
+        }
+
+        if(leftHandFinder->DoWork(tmp)){
+            leftHand = true;
+            leftArm = true;
+        }
+        else{
+            leftArm = leftArmFinder->DoWork(tmp);
+        }
+
+        if(rightHandFinder->DoWork(tmp)){
+            rightHand = true;
+            rightArm = true;
+        }
+        else{
+            rightArm = rightArmFinder->DoWork(tmp);
+        }
+
+        leftFoot = leftFootFinder->DoWork(tmp);
+        rightFoot = rightFootFinder->DoWork(tmp);
+        bodyPrint = bodyPrintFinder->DoWork(tmp);
+
+        std::cout << "#############################################" << std::endl;
+        std::cout << "File #" << entry << std::endl;
+        std::cout << "---------------------------------------------" << std::endl;
+        std::cout << std::boolalpha;
+        std::cout << "Hat       -> " << hat << std::endl;
+        std::cout << "Head      -> " << head << std::endl;
+        std::cout << "Left Hand -> " << leftHand << std::endl;
+        std::cout << "Right Hand-> " << rightHand << std::endl; 
+        std::cout << "Left Arm  -> " << leftArm << std::endl; 
+        std::cout << "Right Arm -> " << rightArm << std::endl; 
+        std::cout << "Left Foot -> " << leftFoot << std::endl; 
+        std::cout << "Right Foot-> " << rightFoot << std::endl; 
+        std::cout << "Face      -> " << facePrint << std::endl; 
+        std::cout << "Body Print-> " << bodyPrint << std::endl; 
+        std::cout << "#############################################" << std::endl;
+    }
+
+
 
     return(Fl::run());
 }

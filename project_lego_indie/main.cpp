@@ -217,7 +217,7 @@ int main(int argc, char** argv)
 
         std::stringstream strstr;
         strstr << "#############################################" << std::endl;
-        strstr << "File #" << entry << std::endl;
+        strstr << "File #" << entry.path().string() << std::endl;
         strstr << "---------------------------------------------" << std::endl;
         strstr << std::boolalpha;
         strstr << "Hat       -> " << hat << std::endl;

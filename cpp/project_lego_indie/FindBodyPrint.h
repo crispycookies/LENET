@@ -22,6 +22,13 @@
  */
 class FindBodyPrint: public IPicWorker {
     public:
+
+        /**
+         * CTor
+         * @param inf if true blocking window showing a graphical result of this worker will be displayed.
+         */
+        FindBodyPrint(bool inf = false) : m_ShowInfo(inf) {};
+
         /**
          * Tries to find the body print in the given picture.
          * @param pic [in] Picture to analyze.
@@ -41,6 +48,7 @@ class FindBodyPrint: public IPicWorker {
     private:
         const cv::Scalar m_LowerColorBound = cv::Scalar(25, 48, 155);
         const cv::Scalar m_UpperColorBound = cv::Scalar(33, 104, 214);
+        bool m_ShowInfo;
 };
 
 #endif // FINBODYPRINT_H

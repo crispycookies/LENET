@@ -23,6 +23,12 @@
 class FindHat: public IPicWorker {
     public:
         /**
+         * CTor
+         * @param inf if true blocking window showing a graphical result of this worker will be displayed.
+         */
+        FindHat(bool inf = false) : m_ShowInfo(inf) {};
+
+        /**
          * Tries to find the hat in the given picture.
          * @param pic [in] Picture to analyze.
          * @return true if feature was found, false otherwise.
@@ -41,6 +47,7 @@ class FindHat: public IPicWorker {
     private:
         const cv::Scalar m_LowerColorBound = cv::Scalar(6, 80, 63);
         const cv::Scalar m_UpperColorBound = cv::Scalar(19, 255, 153);
+        bool m_ShowInfo;
 };
 
 #endif // FINDHAT_H

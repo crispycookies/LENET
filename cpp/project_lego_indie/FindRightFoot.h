@@ -22,6 +22,13 @@
  */
 class FindRightFoot: public IPicWorker {
     public:
+
+        /**
+         * CTor
+         * @param inf if true blocking window showing a graphical result of this worker will be displayed.
+         */
+        FindRightFoot(bool inf = false) : m_ShowInfo(inf) {};
+
         /**
          * Tries to find the right foot in the given picture.
          * @param pic [in] Picture to analyze.
@@ -41,6 +48,7 @@ class FindRightFoot: public IPicWorker {
     private:
         const cv::Scalar m_LowerColorBound = cv::Scalar(12, 107, 178);
         const cv::Scalar m_UpperColorBound = cv::Scalar(20, 178, 229);
+        bool m_ShowInfo;
 };
 
 #endif // FINDRIGHTFOOT_H

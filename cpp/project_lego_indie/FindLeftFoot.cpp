@@ -12,12 +12,18 @@
 #include <opencv2/imgproc.hpp>
 #include <iostream>
 
+#include "ImgShow.h"
+
 bool FindLeftFoot::DoWork(cv::Mat& pic) {
     cv::Mat pic_HSV;
     cv::cvtColor(pic, pic_HSV, cv::COLOR_BGR2HSV);
     cv::Mat roiLeftFoot = pic_HSV(cv::Rect(0, pic.rows * 0.8, pic.cols * 0.4, pic.rows-pic.rows * 0.8));
     cv::Mat hasLFoot;
     cv::inRange(roiLeftFoot, m_LowerColorBound, m_UpperColorBound, hasLFoot);
+
+    if(m_ShowInfo)
+        ImgShow(hasLFoot, "Has left foot", ImgShow::grey, false, true);
+
     if(cv::countNonZero(hasLFoot))
         return true;
     return false;

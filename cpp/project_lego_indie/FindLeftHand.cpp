@@ -13,12 +13,18 @@
 #include <opencv2/imgproc.hpp>
 #include <iostream>
 
+#include "ImgShow.h"
+
 bool FindLeftHand::DoWork(cv::Mat& pic) {
     cv::Mat pic_HSV;
     cv::cvtColor(pic, pic_HSV, cv::COLOR_BGR2HSV);
     cv::Mat roiLeftHand = pic_HSV(cv::Rect(0, pic.rows/ 2, pic.cols * 0.3, pic.rows/2));
     cv::Mat hasLHand;
     cv::inRange(roiLeftHand, m_LowerColorBound, m_UpperColorBound, hasLHand);
+
+    if(m_ShowInfo)
+        ImgShow(hasLHand, "Has left hand", ImgShow::grey, false, true);
+
     if(cv::countNonZero(hasLHand))
         return true;
     return false;

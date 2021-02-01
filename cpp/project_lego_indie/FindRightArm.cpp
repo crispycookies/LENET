@@ -10,6 +10,7 @@
 
 #include "FindRightArm.h"
 #include "ImgShow.h"
+#include "Icon.h"
 
 #include <opencv2/imgproc.hpp>
 #include <iostream>
@@ -24,37 +25,45 @@ bool FindRightArm::DoWork(cv::Mat& pic) {
 
     double min, max;
     cv::minMaxLoc(found, &min, &max);
-    std::cout << min << std::endl;
 
-    // 3D Plots
-    std::shared_ptr<mglFLTK> gr = std::make_shared<mglFLTK>(
-        // plotting callback (needed for interactive plots)
-        [](mglBase *p1, void *p2) -> int{
-            mglGraph gr(p1);
-            cv::Mat d = *(static_cast<cv::Mat*>(p2));
-        
-            double min, max;
-            cv::minMaxLoc(d, &min, &max);
+    if(m_ShowInfo){
+        // 3D Plots
+        mglFLTK gr = mglFLTK(
+            // plotting callback (needed for interactive plots)
+            [](mglBase *p1, void *p2) -> int{
+                mglGraph gr(p1);
+                cv::Mat d = *(static_cast<cv::Mat*>(p2));
+            
+                double min, max;
+                cv::minMaxLoc(d, &min, &max);
 
-            mglData d1{d.rows, d.cols, (float*)d.data};
-            gr.SubPlot(1,1,0);
-            gr.Title("");
-            gr.Box();
-            gr.SetRanges(0, d1.nx, 0, d1.ny, min, max);
-            gr.Axis("z");
-            gr.Surf(d1, "BbcyrR"); // BbcyrR == jet color map
-            //gr.Dens(cur.dat, "BbcyrR"); // for 2D only
-            gr.Colorbar();
+                mglData d1{d.rows, d.cols, (float*)d.data};
+                gr.SubPlot(1,1,0);
+                gr.Title("");
+                gr.Box();
+                gr.SetRanges(0, d1.nx, 0, d1.ny, min, max);
+                gr.Axis("z");
+                gr.Surf(d1, "BbcyrR"); // BbcyrR == jet color map
+                //gr.Dens(cur.dat, "BbcyrR"); // for 2D only
+                gr.Colorbar();
 
-            return 0;
-        }
-        // window title
-        ,"Interactive Plots"
-        
-        // data passed to plotting callback
-        ,&found
+                return 0;
+            }
+            // window title
+            ,"Tamplate Matching right arm"
+            
+            // data passed to plotting callback
+            ,&found
         );
-    ImgShow(roi, "", ImgShow::rgb, false, false);
+
+        // add window icon
+        std::shared_ptr<Fl_RGB_Image> icon = std::make_shared<Fl_RGB_Image>(icon_data, 128, 128, ImgShow::fl_imgtype::rgba, 0);
+        Fl_Widget* widget = (Fl_Widget*)mgl_fltk_widget(gr.Self()); // get the underlaying fltk widget
+        Fl_Double_Window* window = ((Fl_Double_Window*)widget->parent()); // get the underlaying fltk window
+        window->icon(icon.get()); // now we can do all the wonderful FLTK stuff on the window
+
+        ImgShow(roi, "Region right arm", ImgShow::rgb, false, true);
+    }
 
     if(min < 0.103)
         return true;

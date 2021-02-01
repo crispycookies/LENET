@@ -230,10 +230,18 @@ bool FindFigure::DoWork(cv::Mat& pic){
     angle = angle * -180 / CV_PI;
     
     // get the rotation matrix
-    cv::Mat picPadded, picRot;
+    cv::Mat picRot;
     picRot = getRotationMatrix2D(cv::Point2f(pic.cols/2, pic.rows/2), angle, 1.0);
     cv::warpAffine(pic, pic, picRot, pic.size(), 1, cv::BORDER_CONSTANT, cv::Scalar(255,255,255));
     cv::resize(pic, pic, cv::Size(m_scale_x, m_scale_y));
+
+    if(m_ShowInfo){
+        ImgShow a(roi, "Brightness corrected ROI", ImgShow::rgb, false);
+        ImgShow b(shifted, "Pyramid mean shifted", ImgShow::rgb, false);
+        ImgShow c(thresh, "Contour threshhold", ImgShow::grey, false);
+        ImgShow d(rotated, "Cut & rotated contour", ImgShow::rgb, false);
+        ImgShow(drawLineP(lines, pic), "Rotetad pic with original lines", ImgShow::rgb, false, true);
+    }
 
     return true;
 }

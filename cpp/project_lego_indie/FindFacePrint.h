@@ -26,8 +26,9 @@ class FindFacePrint: public IPicWorker {
         /**
          * CTor
          * @param tmpl Example template used to match the face.
+         * @param inf if true blocking window showing a graphical result of this worker will be displayed.
          */
-        FindFacePrint(const cv::Mat & tmpl) : m_Template(tmpl) {};
+        FindFacePrint(const cv::Mat & tmpl, bool inf = false) : m_Template(tmpl), m_ShowInfo(inf) {};
 
         /**
          * Tries to find the face print in the given picture.
@@ -47,6 +48,7 @@ class FindFacePrint: public IPicWorker {
 
     private:
         cv::Mat m_Template;
+        bool m_ShowInfo;
 };
 
 #endif // FINDFACEPRINT_H

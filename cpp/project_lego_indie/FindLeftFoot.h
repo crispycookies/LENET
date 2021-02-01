@@ -23,6 +23,12 @@
 class FindLeftFoot: public IPicWorker {
     public:
         /**
+         * CTor
+         * @param inf if true blocking window showing a graphical result of this worker will be displayed.
+         */
+        FindLeftFoot(bool inf = false) : m_ShowInfo(inf) {};
+
+        /**
          * Tries to find the left foot in the given picture.
          * @param pic [in] Picture to analyze.
          * @return true if feature was found, false otherwise.
@@ -41,6 +47,7 @@ class FindLeftFoot: public IPicWorker {
     private:
         const cv::Scalar m_LowerColorBound = cv::Scalar(12, 107, 178);
         const cv::Scalar m_UpperColorBound = cv::Scalar(20, 178, 229);
+        bool m_ShowInfo;
 };
 
 #endif // FINDHAT_H

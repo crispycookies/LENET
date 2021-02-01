@@ -35,7 +35,13 @@ protected:
     virtual std::tuple<cv::Point2f, cv::Mat, cv::Mat, cv::Mat> get_rotation_matrix(const cv::RotatedRect & rot_rect, cv::Mat & roi);
     virtual std::vector<cv::Vec4i> analyzeLines(const cv::Mat & pic);
 public:
-    FindFigure(const cv::Mat& bg) : m_Background(bg){};
+
+    /**
+     * CTor
+     * @param bg Background picture to be used for brightness adjustment.
+     * @param inf if true blocking window showing a graphical result of this worker will be displayed.
+     */
+    FindFigure(const cv::Mat& bg, bool inf = false) : m_Background(bg), m_ShowInfo(inf){};
 
     /**
      * Tries to find a lego figure on the picture.
@@ -59,6 +65,8 @@ private:
     const size_t m_crop_y = 27;
     const size_t m_scale_x = 124;
     const size_t m_scale_y = 200;
+
+    bool m_ShowInfo;
 
     cv::Mat drawLineP(const std::vector<cv::Vec4i>& lines, const cv::Mat& pic);
 };

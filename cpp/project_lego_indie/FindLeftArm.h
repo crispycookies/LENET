@@ -25,8 +25,9 @@ class FindLeftArm: public IPicWorker {
         /**
          * CTor
          * @param tmpl Example template used to match the arm.
+         * @param inf if true blocking window showing a graphical result of this worker will be displayed.
          */
-        FindLeftArm(const cv::Mat & tmpl) : m_Template(tmpl) {};
+        FindLeftArm(const cv::Mat & tmpl, bool inf = false) : m_Template(tmpl), m_ShowInfo(inf) {};
 
         /**
          * Tries to find the left arm in the given picture.
@@ -46,6 +47,7 @@ class FindLeftArm: public IPicWorker {
 
     private:
         cv::Mat m_Template;
+        bool m_ShowInfo;
 };
 
 #endif // FINDLEFTARM_H

@@ -23,6 +23,12 @@
 class FindHead: public IPicWorker {
     public:
         /**
+         * CTor
+         * @param inf if true blocking window showing a graphical result of this worker will be displayed.
+         */
+        FindHead(bool inf = false) : m_ShowInfo(inf) {};
+
+        /**
          * Tries to find the head in the given picture.
          * @param pic [in] Picture to analyze.
          * @return true if feature was found, false otherwise.
@@ -41,6 +47,7 @@ class FindHead: public IPicWorker {
     private:
         const cv::Scalar m_LowerColorBound = cv::Scalar(11, 85, 240);
         const cv::Scalar m_UpperColorBound = cv::Scalar(29, 107, 255);
+        bool m_ShowInfo;
 };
 
 #endif // FINHEAD_H

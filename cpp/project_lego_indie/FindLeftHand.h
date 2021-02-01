@@ -22,6 +22,13 @@
  */
 class FindLeftHand: public IPicWorker {
     public:
+
+        /**
+         * CTor
+         * @param inf if true blocking window showing a graphical result of this worker will be displayed.
+         */
+        FindLeftHand(bool inf = false) : m_ShowInfo(inf) {};
+
         /**
          * Tries to find the left hand in the given picture.
          * @param pic [in] Picture to analyze.
@@ -41,6 +48,7 @@ class FindLeftHand: public IPicWorker {
     private:
         const cv::Scalar m_LowerColorBound = cv::Scalar(11, 85, 240);
         const cv::Scalar m_UpperColorBound = cv::Scalar(29, 107, 255);
+        bool m_ShowInfo;
 };
 
 #endif // FINDLEFTHAND_H
